@@ -237,16 +237,19 @@ module.exports = function (options) {
             think._caches.modules = modules.filter(x => options.denyModules.indexOf(x) === -1);
         });
     }
-    
+
     return function (ctx, next) {
-        ctx.routers = think._caches.configs.router;
+        lib.define(ctx, 'routers', think._caches.configs.router, 1);
         if (ctx.routers) {
             parseRoute(ctx, ctx.routers, options);
         }
 
         const pathname = getPathname(ctx, options);
-        ctx.originalPath = ctx.path;
-        ctx.path = pathname;
+        lib.define(ctx, 'originalPath', ctx.path);
+        lib.define(ctx, 'path', pathname, 1);
+        lib.define(ctx, 'group', '', 1);
+        lib.define(ctx, 'controller', '', 1);
+        lib.define(ctx, 'action', '', 1);
 
         if (modules.length) {
             parsePathname(ctx, pathname, options, true);
