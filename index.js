@@ -91,13 +91,14 @@ const cleanPathname = function (pathname) {
  * @param {any} ctx 
  * @param {any} pathname 
  * @param {any} options 
+ * @param {any} modules 
  * @param {boolean} [multi=false] 
  * @returns 
  */
-const parsePathname = function (ctx, pathname, options, multi = false) {
+const parseDefault = function (ctx, pathname, options, modules, multi = false) {
     if (pathname) {
         pathname = cleanPathname(pathname);
-        let paths = pathname.split('/') || [], modules = think._caches.modules || [], group = '';
+        let paths = pathname.split('/') || [], group = '';
         if (multi) {
             if (paths[0] && modules.indexOf(paths[0]) > -1) {
                 group = paths.shift();
@@ -189,7 +190,7 @@ const parseAction = function (action, value = 'index') {
  * @param {any} routers 
  * @param {any} options 
  */
-const parseRoute = function (ctx, routers, options) {
+const parseRouter = function (ctx, routers, options) {
     let keys, regexp, regres, index, url, path, query, method = ctx.method;
     if (routers && routers.length) {
         for (let r in routers) {
@@ -229,19 +230,19 @@ const parseRoute = function (ctx, routers, options) {
 };
 
 module.exports = function (options) {
-    let modules = think._caches.modules || [];
-    if (modules.length) {
+    think._caches._modules = think._caches._modules || [];
+    if (think._caches._modules.length) {
         think.app.once('appReady', () => {
             //过滤禁止访问的模块
             options.deny_modules = options.deny_modules || [];
-            think._caches.modules = modules.filter(x => options.denyModules.indexOf(x) === -1);
+            think._caches._modules = think._caches._modules.filter(x => options.denyModules.indexOf(x) === -1);
         });
     }
 
     return function (ctx, next) {
         lib.define(ctx, 'routers', think._caches.configs.router, 1);
         if (ctx.routers) {
-            parseRoute(ctx, ctx.routers, options);
+            parseRouter(ctx, ctx.routers, options);
         }
 
         const pathname = getPathname(ctx, options);
@@ -251,10 +252,10 @@ module.exports = function (options) {
         lib.define(ctx, 'controller', '', 1);
         lib.define(ctx, 'action', '', 1);
 
-        if (modules.length) {
-            parsePathname(ctx, pathname, options, true);
+        if (think._caches._modules.length) {
+            parseDefault(ctx, pathname, options, think._caches._modules, true);
         } else {
-            parsePathname(ctx, pathname, options);
+            parseDefault(ctx, pathname, options, think._caches._modules);
         }
 
         return next();
