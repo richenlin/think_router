@@ -246,7 +246,6 @@ module.exports = function (options) {
         }
 
         const pathname = getPathname(ctx, options);
-        lib.define(ctx, 'originalPath', ctx.path);
         lib.define(ctx, 'path', pathname, 1);
         lib.define(ctx, 'group', '', 1);
         lib.define(ctx, 'controller', '', 1);
