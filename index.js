@@ -229,7 +229,22 @@ const parseRouter = function (ctx, routers, options) {
     return ctx;
 };
 
+/**
+ * default options
+ */
+const defaultOptions = {
+    deny_modules: ['common'], //禁止访问的模块
+    default_module: 'home', //默认的模块
+    default_controller: 'index', //默认控制器
+    default_action: 'index', //默认方法
+    prefix: [], // url prefix
+    suffix: ['.jhtml'], // url suffix
+    subdomain_offset: 2,
+    subdomain: {}, //subdomain
+};
+
 module.exports = function (options) {
+    options = options ? lib.extend(defaultOptions, options, true) : defaultOptions;
     think._caches._modules = think._caches._modules || [];
     if (think._caches._modules.length) {
         think.app.once('appReady', () => {
