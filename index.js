@@ -86,37 +86,6 @@ const cleanPathname = function (pathname) {
 };
 
 /**
- * 
- * 
- * @param {any} ctx 
- * @param {any} pathname 
- * @param {any} options 
- * @param {any} modules 
- * @param {boolean} [multi=false] 
- * @returns 
- */
-const parseDefault = function (ctx, pathname, options, modules, multi = false) {
-    if (pathname) {
-        pathname = cleanPathname(pathname);
-        let paths = pathname.split('/') || [], group = '';
-        if (multi) {
-            if (paths[0] && modules.indexOf(paths[0]) > -1) {
-                group = paths.shift();
-            }
-            ctx.group = parseGroup(group, options.default_module);
-        }
-        ctx.controller = parseController(paths.shift(), options.default_controller);
-        ctx.action = parseAction(paths.shift(), options.default_action);
-        // parse params
-        if (paths.length) {
-            for (let i = 0, length = Math.ceil(paths.length) / 2; i < length; i++) {
-                ctx._get[paths[i * 2]] = paths[i * 2 + 1] || '';
-            }
-        }
-    }
-    return ctx;
-};
-/**
  * 检测Group,Controller和Action是否合法
  * @type {RegExp}
  */
@@ -171,6 +140,42 @@ const parseAction = function (action, value = 'index') {
         return null;
     }
     return action;
+};
+
+/**
+ * 
+ * 
+ * @param {any} ctx 
+ * @param {any} pathname 
+ * @param {any} options 
+ * @param {any} modules 
+ * @param {boolean} [multi=false] 
+ * @returns 
+ */
+const parseDefault = function (ctx, pathname, options, modules, multi = false) {
+    if (pathname) {
+        pathname = cleanPathname(pathname);
+        let paths = pathname.split('/') || [], group = '';
+        if (multi) {
+            if (paths[0] && modules.indexOf(paths[0]) > -1) {
+                group = paths.shift();
+            }
+            ctx.group = parseGroup(group, options.default_module);
+        }
+        ctx.controller = parseController(paths.shift(), options.default_controller);
+        if (options.deny_controller && (options.deny_controller).indexOf(ctx.controller) > -1){
+            ctx.throw(403, 'Controller denied access');
+            return null;
+        }
+        ctx.action = parseAction(paths.shift(), options.default_action);
+        // parse params
+        if (paths.length) {
+            for (let i = 0, length = Math.ceil(paths.length) / 2; i < length; i++) {
+                ctx._get[paths[i * 2]] = paths[i * 2 + 1] || '';
+            }
+        }
+    }
+    return ctx;
 };
 
 /**
@@ -233,8 +238,10 @@ const parseRouter = function (ctx, routers, options) {
  * default options
  */
 const defaultOptions = {
-    deny_modules: ['common'], //禁止访问的模块
+    mulit_modules: false, //开启多模块支持
+    deny_modules: ['common'], //禁止访问的模块(多模块模式)
     default_module: 'home', //默认的模块
+    deny_controller: [], //禁止访问的控制器
     default_controller: 'index', //默认控制器
     default_action: 'index', //默认方法
     prefix: [], // url prefix
@@ -246,7 +253,7 @@ const defaultOptions = {
 module.exports = function (options) {
     options = options ? lib.extend(defaultOptions, options, true) : defaultOptions;
     think._caches._modules = think._caches._modules || [];
-    if (think._caches._modules.length) {
+    if (options.mulit_modules) {
         think.app.once('appReady', () => {
             //过滤禁止访问的模块
             options.deny_modules = options.deny_modules || [];
@@ -266,12 +273,14 @@ module.exports = function (options) {
         lib.define(ctx, 'controller', '', 1);
         lib.define(ctx, 'action', '', 1);
 
-        if (think._caches._modules.length) {
-            parseDefault(ctx, pathname, options, think._caches._modules, true);
+        if (options.mulit_modules) {
+            ctx = parseDefault(ctx, pathname, options, think._caches._modules, true);
         } else {
-            parseDefault(ctx, pathname, options, think._caches._modules);
+            ctx = parseDefault(ctx, pathname, options, think._caches._modules);
         }
-
-        return next();
+        if (ctx){
+            return next();
+        }
+        return null;
     };
 };
