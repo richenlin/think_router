@@ -36,3 +36,23 @@ config: { //中间件配置
     }
 }
 ```
+
+###自定义路由
+除默认的单模块模式(controller/action)及多模块模式(module/controller/action）以外，还支持用户定制路由。
+在项目中增加路由文件 config/router.js:
+```
+module.exports = {
+    ['/product', {
+        get: "/home/product/index"
+    }],
+    ['/product/:id', {
+        get: "/home/product/detail",
+        post: "/home/product/add",
+        put: "/home/product/update",
+        delete: "/home/product/delete",
+    }],
+    ['/product', "/home/product/index"]
+}
+
+```
+按照实际项目需求进行修改即可。
