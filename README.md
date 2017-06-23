@@ -37,7 +37,7 @@ config: { //中间件配置
 }
 ```
 
-###自定义路由
+### 自定义路由
 除默认的单模块模式(controller/action)及多模块模式(module/controller/action）以外，还支持用户定制路由。
 在项目中增加路由文件 config/router.js:
 ```
