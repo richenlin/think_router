@@ -238,7 +238,7 @@ const parseRouter = function (ctx, routers, options) {
  * default options
  */
 const defaultOptions = {
-    mulit_modules: false, //开启多模块支持
+    multi_modules: false, //开启多模块支持
     deny_modules: ['common'], //禁止访问的模块(多模块模式)
     default_module: 'home', //默认的模块
     deny_controller: [], //禁止访问的控制器
@@ -253,7 +253,7 @@ const defaultOptions = {
 module.exports = function (options) {
     options = options ? lib.extend(defaultOptions, options, true) : defaultOptions;
     think._caches._modules = think._caches._modules || [];
-    if (options.mulit_modules) {
+    if (options.multi_modules) {
         think.app.once('appReady', () => {
             //过滤禁止访问的模块
             options.deny_modules = options.deny_modules || [];
@@ -273,7 +273,7 @@ module.exports = function (options) {
         lib.define(ctx, 'controller', '', 1);
         lib.define(ctx, 'action', '', 1);
 
-        if (options.mulit_modules) {
+        if (options.multi_modules) {
             ctx = parseDefault(ctx, pathname, options, think._caches._modules, true);
         } else {
             ctx = parseDefault(ctx, pathname, options, think._caches._modules);

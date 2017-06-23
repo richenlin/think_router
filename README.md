@@ -23,7 +23,7 @@ npm i think_router
 config: { //中间件配置
     ...,
     router: {
-        mulit_modules: false, //开启多模块支持
+        multi_modules: false, //开启多模块支持
         deny_modules: ['common'], //禁止访问的模块(多模块模式)
         default_module: 'home', //默认的模块
         deny_controller: [], //禁止访问的控制器
