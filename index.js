@@ -257,7 +257,7 @@ module.exports = function (options) {
         think.app.once('appReady', () => {
             //过滤禁止访问的模块
             options.deny_modules = options.deny_modules || [];
-            think._caches._modules = think._caches._modules.filter(x => options.denyModules.indexOf(x) === -1);
+            think._caches._modules = think._caches._modules.filter(x => options.deny_modules.indexOf(x) === -1);
         });
     }
 
