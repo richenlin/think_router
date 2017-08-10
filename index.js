@@ -197,7 +197,7 @@ const parseDefault = function (ctx, pathname, options, modules, multi = false) {
  */
 const parseRouter = function (ctx, routers, options) {
     let keys, regexp, regres, index, url, path, query, method = ctx.method;
-    if (routers && routers.length) {
+    if (routers) {
         for (let r in routers) {
             keys = [];
             regexp = pathToRegexp(routers[r][0], keys, { strict: true, sensitive: true });

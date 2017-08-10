@@ -42,16 +42,16 @@ config: { //中间件配置
 在项目中增加路由文件 config/router.js:
 ```
 module.exports = {
-    ['/product', {
+    test: ['/product', {
         get: "/home/product/index"
     }],
-    ['/product/:id', {
+    test1: ['/product/:id', {
         get: "/home/product/detail",
         post: "/home/product/add",
         put: "/home/product/update",
         delete: "/home/product/delete",
     }],
-    ['/product', "/home/product/index"]
+    test2: ['/product', "/home/product/index"]
 }
 
 ```
