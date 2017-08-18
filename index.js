@@ -180,16 +180,18 @@ const parseDefault = function (ctx, pathname, options, modules, multi = false) {
 
 /**
  * 
- * ['/product', {
+ * {
+    test: ['/product', {
         get: "/home/product/index"
     }],
-    ['/product/:id', {
+    test1: ['/product/:id', {
         get: "/home/product/detail",
         post: "/home/product/add",
         put: "/home/product/update",
         delete: "/home/product/delete",
     }],
-    ['/product', "/home/product/index"]
+    test2: ['/product', "/home/product/index"]
+}
  * 
  * @param {any} ctx 
  * @param {any} routers 
@@ -263,20 +265,21 @@ module.exports = function (options) {
 
     return function (ctx, next) {
         lib.define(ctx, 'routers', think._caches.configs.router, 1);
+
+        const pathname = getPathname(ctx, options);
+        lib.define(ctx, 'path', pathname, 1);
         if (ctx.routers) {
             parseRouter(ctx, ctx.routers, options);
         }
 
-        const pathname = getPathname(ctx, options);
-        lib.define(ctx, 'path', pathname, 1);
         lib.define(ctx, 'group', '', 1);
         lib.define(ctx, 'controller', '', 1);
         lib.define(ctx, 'action', '', 1);
 
         if (options.multi_modules) {
-            ctx = parseDefault(ctx, pathname, options, think._caches._modules, true);
+            ctx = parseDefault(ctx, ctx.path, options, think._caches._modules, true);
         } else {
-            ctx = parseDefault(ctx, pathname, options, think._caches._modules);
+            ctx = parseDefault(ctx, ctx.path, options, think._caches._modules);
         }
         if (ctx){
             return next();
