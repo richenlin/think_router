@@ -277,9 +277,9 @@ module.exports = function (options) {
         lib.define(ctx, 'action', '', 1);
 
         if (options.multi_modules) {
-            ctx = parseDefault(ctx, ctx.path, options, think._caches._modules, true);
+            parseDefault(ctx, ctx.path, options, think._caches._modules, true);
         } else {
-            ctx = parseDefault(ctx, ctx.path, options, think._caches._modules);
+            parseDefault(ctx, ctx.path, options, think._caches._modules);
         }
         if (ctx){
             return next();
