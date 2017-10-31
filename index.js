@@ -171,7 +171,7 @@ const parseDefault = function (ctx, pathname, options, modules, multi = false) {
         // parse params
         if (paths.length) {
             for (let i = 0, length = Math.ceil(paths.length) / 2; i < length; i++) {
-                ctx._get[paths[i * 2]] = paths[i * 2 + 1] || '';
+                !(ctx._get[paths[i * 2]]) && (ctx._get[paths[i * 2]] = paths[i * 2 + 1] || '');
             }
         }
     }
