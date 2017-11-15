@@ -12,11 +12,12 @@ const lib = require('think_lib');
 /**
  * 
  * 
+ * @param {any} app 
  * @param {any} ctx 
  * @param {any} options 
  * @returns 
  */
-const getPathname = function (ctx, options) {
+const getPathname = function (app, ctx, options) {
     let pathname = ctx.path || '';
     const prefix = options.prefix;
     //remove prefix in pathname
@@ -26,7 +27,7 @@ const getPathname = function (ctx, options) {
                 pathname = pathname.slice(item.length);
                 return true;
             }
-            if (lib.isRegexp(item) && item.test(pathname)) {
+            if (lib.isRegExp(item) && item.test(pathname)) {
                 pathname = pathname.replace(item, '');
                 return true;
             }
@@ -41,7 +42,7 @@ const getPathname = function (ctx, options) {
                 pathname = pathname.slice(0, pathname.length - item.length);
                 return true;
             }
-            if (lib.isRegexp(item) && item.test(pathname)) {
+            if (lib.isRegExp(item) && item.test(pathname)) {
                 pathname = pathname.replace(item, '');
                 return true;
             }
@@ -52,7 +53,7 @@ const getPathname = function (ctx, options) {
     let subdomain = options.subdomain || '';
     if (!lib.isEmpty(subdomain)) {
         if (options.subdomain_offset) {
-            think.app.subdomainOffset = options.subdomain_offset;
+            app.subdomainOffset = options.subdomain_offset;
         }
         let subdomainStr = ctx.subdomains().join(',');
         if (subdomainStr && subdomain[subdomainStr]) {
@@ -252,21 +253,22 @@ const defaultOptions = {
     subdomain: {}, //subdomain
 };
 
-module.exports = function (options) {
+module.exports = function (options, app) {
     options = options ? lib.extend(defaultOptions, options, true) : defaultOptions;
-    think._caches._modules = think._caches._modules || [];
+    let koa = global.think ? (think.app || {}) : (app.koa || {});
+    let modules = global.think ? (app.modules || []) : (think._caches.modules || []);
     if (options.multi_modules) {
-        think.app.once('appReady', () => {
+        koa.once('appReady', () => {
             //过滤禁止访问的模块
             options.deny_modules = options.deny_modules || [];
-            think._caches._modules = think._caches._modules.filter(x => options.deny_modules.indexOf(x) === -1);
+            modules = modules.filter(x => options.deny_modules.indexOf(x) === -1);
         });
     }
 
     return function (ctx, next) {
-        lib.define(ctx, 'routers', think._caches.configs.router, 1);
+        lib.define(ctx, 'routers', global.think ? think._caches.configs.router : app.configs.router, 1);
 
-        const pathname = getPathname(ctx, options);
+        const pathname = getPathname(koa, ctx, options);
         lib.define(ctx, 'path', pathname, 1);
         if (ctx.routers) {
             parseRouter(ctx, ctx.routers, options);
@@ -277,9 +279,9 @@ module.exports = function (options) {
         lib.define(ctx, 'action', '', 1);
 
         if (options.multi_modules) {
-            parseDefault(ctx, ctx.path, options, think._caches._modules, true);
+            parseDefault(ctx, ctx.path, options, modules, true);
         } else {
-            parseDefault(ctx, ctx.path, options, think._caches._modules);
+            parseDefault(ctx, ctx.path, options, modules);
         }
         if (ctx){
             return next();
