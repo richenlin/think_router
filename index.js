@@ -255,10 +255,9 @@ const defaultOptions = {
 
 module.exports = function (options, app) {
     options = options ? lib.extend(defaultOptions, options, true) : defaultOptions;
-    let koa = global.think ? (think.app || {}) : (app.koa || {});
-    let modules = global.think ? (app.modules || []) : (think._caches.modules || []);
+    let modules = app.modules || [];
     if (options.multi_modules) {
-        koa.once('appReady', () => {
+        app.once('appReady', () => {
             //过滤禁止访问的模块
             options.deny_modules = options.deny_modules || [];
             modules = modules.filter(x => options.deny_modules.indexOf(x) === -1);
@@ -266,9 +265,9 @@ module.exports = function (options, app) {
     }
 
     return function (ctx, next) {
-        lib.define(ctx, 'routers', global.think ? think._caches.configs.router : app.configs.router, 1);
+        lib.define(ctx, 'routers', app.configs.router, 1);
 
-        const pathname = getPathname(koa, ctx, options);
+        const pathname = getPathname(app, ctx, options);
         lib.define(ctx, 'path', pathname, 1);
         if (ctx.routers) {
             parseRouter(ctx, ctx.routers, options);
